@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # AI-Based Military Intelligence Dashboard
 
 Streamlit multipage app built on the Global Terrorism Database (GTD).
@@ -11,19 +10,25 @@ pip install -r requirements.txt
 
 1. Put the GTD CSV at `data/globalterrorism.csv`.
 2. (Optional, needed for the Attack Prediction page) Train the model:
+
    ```bash
    python train_attack_model.py
    ```
-   This creates `models/` and fills it with `attack_prediction_model.pkl`,
-   `feature_encoders.pkl`, and `target_encoder.pkl`.
+
+   This creates `models/` and fills it with:
+
+   * `attack_prediction_model.pkl`
+   * `feature_encoders.pkl`
+   * `target_encoder.pkl`
 3. Run the app:
+
    ```bash
    streamlit run app.py
    ```
 
 ## Structure
 
-```
+```text
 Military_Intelligence_Dashboard/
 ├── app.py
 ├── train_attack_model.py
@@ -43,61 +48,46 @@ Military_Intelligence_Dashboard/
 │   ├── 6_📈_Forecasting.py
 │   ├── 7_🧠_AI_Intelligence.py
 │   ├── 8_📊_Data_Explorer.py
-│   └── 9_⚙_Setting.py
+│   └── 9_⚙️_Setting.py
 └── utils/
     ├── __init__.py
     └── data_loader.py
 ```
 
-## Design system (v2 rebuild)
+## Design System (v2 Rebuild)
 
-The dashboard now has an actual visual identity instead of default Streamlit
-styling, plus real cross-page behavior:
+The dashboard now has a dedicated visual identity instead of default Streamlit styling, along with shared cross-page behavior.
 
-- **`utils/theme.py`** — single source of truth for the dark ops-command
-  palette (near-black background, amber primary, red/amber/green threat
-  semantics), monospace + Orbitron typography, and a shared Plotly layout
-  (`style_fig()`) so every chart across every page looks like it belongs to
-  the same product.
-- **`utils/components.py`** — shared building blocks: `page_header()`,
-  `classification_banner()` (the status strip at the top of every page),
-  `kpi_card()`, `threat_badge()`, `section_label()`. No page hand-rolls its
-  own metric or header markup anymore.
-- **`utils/state.py`** — cross-page state:
-  - **Global Command Filters** (year range + region) render in the sidebar
-    on every data page via `render_global_filters()`. Set them once, they
-    follow you to every other module.
-  - **Settings actually do something.** Default Country, Default Forecast
-    Years, and Minimum Prediction Confidence set on the Settings page are
-    read live by Country Analysis, Forecasting, and Attack Prediction via
-    `get_settings()` — no restart required.
-- **`app.py`** is now a real command console: live top-line KPIs plus
-  navigable module cards, instead of a static welcome blurb.
-- Model artifacts are trained on the real 181,691-row GTD dataset and
-  compressed (joblib compress=3) to keep the shipped file size sane
-  (~38MB instead of ~1.2GB uncompressed).
-- Every page/script was run through Streamlit's AppTest harness against
-  the real dataset before packaging — zero runtime exceptions.
+* **`utils/theme.py`** — Centralized dark operations theme, shared typography, and Plotly styling.
+* **`utils/components.py`** — Reusable UI components such as page headers, KPI cards, classification banners, threat badges, and section labels.
+* **`utils/state.py`** — Shared application state, including:
 
-## What was fixed from the original files (v1 cleanup)
+  * Global sidebar filters (year range and region) available across all pages.
+  * Live application settings (default country, forecast years, prediction confidence) used without restarting the app.
+* **`app.py`** now serves as a command console with live KPIs and navigation cards.
+* Trained model artifacts are compressed to reduce storage size.
+* All pages were tested against the full GTD dataset before packaging.
 
-- `utils/data_loader.py` had typos (`df.pd.read_csv`, `.filena`, misspelled
-  filename) that made it crash immediately — rewritten and working.
-- All pages now import from `utils.data_loader` consistently, instead of
-  pages 1–3 using the shared loader while pages 4–9 each re-read and
-  re-parsed the CSV independently.
-- Attack Prediction page: the model previously ran a prediction on every
-  page load/rerun, even before the form was submitted. It now only predicts
-  when you click Predict Attack Type, and shows a clear error if the
-  `models/` files don't exist yet instead of crashing with FileNotFoundError.
-- Threat Level page: the RandomForest was being retrained from scratch on
-  every single interaction (slow). It's now wrapped in `@st.cache_resource`
-  so training happens once per session.
-- Settings page dataset check now catches the specific FileNotFoundError
-  instead of a bare except.
-- Filenames normalized (emoji + underscore convention) so Streamlit's
-  sidebar ordering and labels are consistent.
-=======
-# Military_Intelligence_Dashboard
+## Improvements over the Original Version
+
+* Fixed multiple bugs in `utils/data_loader.py`.
+* Unified data loading so every page uses the shared loader.
+* Optimized Attack Prediction to run only after form submission.
+* Added graceful handling when trained model files are missing.
+* Cached the Threat Level Random Forest model to avoid retraining on every interaction.
+* Improved dataset validation in the Settings page.
+* Standardized Streamlit page filenames and sidebar ordering.
+
+## Dataset
+
+This repository **does not include** the Global Terrorism Database (GTD) because of GitHub file size limits.
+
+Download the GTD dataset separately and place it in:
+
+```text
+data/globalterrorism.csv
+```
+
+## Repository Description
+
 AI-powered military intelligence dashboard for global threat analysis, forecasting, and attack prediction.
->>>>>>> e29713ce82442ec83de83b61171b4ccdad679d24
