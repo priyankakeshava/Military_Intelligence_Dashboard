@@ -64,7 +64,7 @@ section_label("Filtered Dataset")
 
 # Prevent sending huge datasets to the browser by default.
 # Provide controls for safe viewing and explicit confirmation for full downloads.
-MAX_SAFE_ROWS = 50000
+MAX_SAFE_ROWS = 10000
 ROW_OPTIONS = [100, 1000, 5000, "All"]
 default_index = 1 if len(filtered_df) > 100 else 0
 rows_choice = st.selectbox("Rows to display", ROW_OPTIONS, index=default_index)
@@ -98,12 +98,22 @@ with st.expander("Download Full Filtered Dataset (may be large)"):
         **Warning:** The full filtered dataset can be very large and may trigger Streamlit's
         MessageSizeError in the browser. Increase `server.maxMessageSize` in `config.toml` if
         you need to stream larger payloads. See the Streamlit docs for details.
+
+        To reduce transfer size, the full dataset can be downloaded as a gzipped CSV.
         """
     )
-    confirm_full = st.checkbox("I want to download the full filtered dataset (may be large)")
+    confirm_full = st.checkbox("I want to download the full filtered dataset (gzipped, may be large)")
     if confirm_full:
-        csv_full = filtered_df.to_csv(index=False)
-        st.download_button("📥 Download Full Filtered Data", csv_full, file_name="Filtered_GTD_Data_full.csv", mime="text/csv")
+        # Create gzipped CSV bytes to reduce payload size
+        import gzip
+        csv_full_bytes = filtered_df.to_csv(index=False).encode("utf-8")
+        gzipped = gzip.compress(csv_full_bytes)
+        st.download_button(
+            "📥 Download Full Filtered Data (gzipped)",
+            gzipped,
+            file_name="Filtered_GTD_Data_full.csv.gz",
+            mime="application/gzip",
+        )
 
 section_label("Visual Analytics")
 
