@@ -62,10 +62,48 @@ with c4:
 
 section_label("Filtered Dataset")
 
-st.dataframe(filtered_df, use_container_width=True, height=420)
+# Prevent sending huge datasets to the browser by default.
+# Provide controls for safe viewing and explicit confirmation for full downloads.
+MAX_SAFE_ROWS = 50000
+ROW_OPTIONS = [100, 1000, 5000, "All"]
+default_index = 1 if len(filtered_df) > 100 else 0
+rows_choice = st.selectbox("Rows to display", ROW_OPTIONS, index=default_index)
 
-csv = filtered_df.to_csv(index=False)
-st.download_button("📥 Download Filtered Data", csv, file_name="Filtered_GTD_Data.csv", mime="text/csv")
+show_all_confirm = False
+if rows_choice == "All":
+    if len(filtered_df) > MAX_SAFE_ROWS:
+        st.warning(
+            f"Showing all {len(filtered_df):,} rows may be slow or crash the browser."
+        )
+        show_all_confirm = st.checkbox(f"I understand and want to show all {len(filtered_df):,} rows")
+    else:
+        show_all_confirm = True
+
+if rows_choice == "All" and show_all_confirm:
+    df_display = filtered_df
+elif rows_choice == "All":
+    df_display = filtered_df.head(ROW_OPTIONS[2])
+else:
+    df_display = filtered_df.head(int(rows_choice))
+
+st.dataframe(df_display, use_container_width=True, height=420)
+
+# Download: offer the displayed subset first, and an explicit full-download option inside an expander.
+csv_display = df_display.to_csv(index=False)
+st.download_button("📥 Download Displayed Data", csv_display, file_name="Filtered_GTD_Data_sample.csv", mime="text/csv")
+
+with st.expander("Download Full Filtered Dataset (may be large)"):
+    st.markdown(
+        """
+        **Warning:** The full filtered dataset can be very large and may trigger Streamlit's
+        MessageSizeError in the browser. Increase `server.maxMessageSize` in `config.toml` if
+        you need to stream larger payloads. See the Streamlit docs for details.
+        """
+    )
+    confirm_full = st.checkbox("I want to download the full filtered dataset (may be large)")
+    if confirm_full:
+        csv_full = filtered_df.to_csv(index=False)
+        st.download_button("📥 Download Full Filtered Data", csv_full, file_name="Filtered_GTD_Data_full.csv", mime="text/csv")
 
 section_label("Visual Analytics")
 
