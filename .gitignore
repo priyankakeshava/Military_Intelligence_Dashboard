@@ -11,14 +11,11 @@ env/
 # Streamlit secrets
 .streamlit/secrets.toml
 
-# Ignore the GTD dataset
+# GTD dataset
 data/globalterrorism.csv
 
-# Ignore generated ML models
+# Generated ML models
 models/
-
-# Ignore Python cache everywhere
-**/__pycache__/
 
 # OS files
 .DS_Store
