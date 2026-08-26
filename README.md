@@ -1,5 +1,5 @@
 # AI-Based Military Intelligence Dashboard
-
+Link-: https://gtd-intelligence-dashboard.streamlit.app
 AI-assisted Streamlit multipage dashboard for exploratory analysis of the **Global Terrorism Database (GTD)**, including interactive geospatial analysis, country-level analysis, attack-type prediction, threat-level assessment, forecasting, AI-assisted intelligence summaries, and data exploration.
 
 ## Setup
