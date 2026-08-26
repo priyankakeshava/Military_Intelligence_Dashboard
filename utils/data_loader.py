@@ -1,28 +1,33 @@
 from pathlib import Path
 
+import kagglehub
 import pandas as pd
 import streamlit as st
 
 
-def resolve_data_path() -> Path:
-    """Resolve the GTD CSV path from the project root."""
-    return (Path(__file__).resolve().parents[1] / "data" / "globalterrorism.csv").resolve()
-
-
 @st.cache_data
-def load_data():
-    """
-    Loads the Global Terrorism Database CSV and does light cleaning
-    that every page relies on (fills missing kill/wound counts with 0
-    so .sum() and metrics don't break).
-    """
-    data_path = resolve_data_path()
-    if not data_path.exists():
-        raise FileNotFoundError(f"Could not find GTD data file at {data_path}")
+def load_data() -> pd.DataFrame:
+    # Download the GTD dataset from Kaggle
+    dataset_path = kagglehub.dataset_download("START-UMD/gtd")
 
-    df = pd.read_csv(data_path, encoding="latin1", low_memory=False)
+    # Find the CSV inside the downloaded dataset
+    csv_files = list(Path(dataset_path).rglob("*.csv"))
 
-    df["nkill"] = df["nkill"].fillna(0)
-    df["nwound"] = df["nwound"].fillna(0)
+    if not csv_files:
+        raise FileNotFoundError("No CSV file found in the Kaggle dataset.")
+
+    # Load the dataset
+    df = pd.read_csv(
+        csv_files[0],
+        encoding="latin1",
+        low_memory=False
+    )
+
+    # Clean casualty columns
+    if "nkill" in df.columns:
+        df["nkill"] = df["nkill"].fillna(0)
+
+    if "nwound" in df.columns:
+        df["nwound"] = df["nwound"].fillna(0)
 
     return df
